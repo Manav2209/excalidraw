@@ -1,31 +1,33 @@
-import express from 'express';
-import {RegisterSchema , LoginSchema , CreateRoomSchema} from "@repo/common/types"
-import cors from "cors";
-import { prismaClient} from "@repo/db/client"
-import bcrypt from "bcrypt"
-import jwt  from 'jsonwebtoken';
-import { JWT_SECRET } from '@repo/backend-common/config';
-import { middleware } from './middleware';
+import { prismaClient } from "@repo/db/client";
+import express from "express"
+import {RegisterSchema, LoginSchema, CreateRoomSchema} from "@repo/common/types"
+import brcypt from "bcryptjs"
+import jwt from "jsonwebtoken"
+import 'dotenv/config'
+import cors from "cors"
+import { middleware } from "./middleware";
 
-const app = express();
-app.use(express.json());
+const app = express()
+
+app.use(express.json())
 app.use(cors())
 
 
-app.post('/signup' , async (req, res) => {
+
+app.post("/signup", async (req, res)=> {
     const validatedFields = RegisterSchema.safeParse(req.body)
 
     if(!validatedFields.success){
         res.json({
-            error:"Invalid fields"
+            error: "Invalid Fields"
         })
-
-        return
+        return;
     }
 
-    const {username, email,password } = validatedFields.data;
+    const {username, email, password} = validatedFields.data
 
-    const hashedPassword = await bcrypt.hash(password , 10)
+    const hashedPassword = await brcypt.hash(password , 10)
+
     const existingUser = await prismaClient.user.findUnique({
         where:{
             email
@@ -34,13 +36,14 @@ app.post('/signup' , async (req, res) => {
 
     if(existingUser){
         res.json({
-            error:"User Already Exists!"
+            error: "User Already Exists!"
         })
         return;
     }
+
     const user = await prismaClient.user.create({
         data: {
-            name: username,
+            username,
             email,
             password: hashedPassword
         }
@@ -52,20 +55,19 @@ app.post('/signup' , async (req, res) => {
     })
 })
 
-app.post('/signin' , async (req, res) => {
-
-    const validatedFields = LoginSchema.safeParse(req.body);
+app.post("/signin", async (req,res)=> {
+    const validatedFields = LoginSchema.safeParse(req.body)
 
     if(!validatedFields || !validatedFields.success || !validatedFields.data.password){
         res.json({
-            error:"Invalid fields"
+            error: "Invalid Fields!"
         })
         return;
     }
 
-    const {email , password} = validatedFields.data;
+    const {email, password} = validatedFields.data
 
-    const user = await prismaClient.user.findUnique({
+    const user  = await prismaClient.user.findUnique({
         where:{
             email
         }
@@ -73,12 +75,12 @@ app.post('/signin' , async (req, res) => {
 
     if(!user){
         res.json({
-            error:"User does not exist"
+            error: "User does not exist!"
         })
         return;
     }
 
-    const matchPassword =await bcrypt.compare(password,user.password);
+    const matchPassword  = await brcypt.compare(password , user.password)
 
     if(!matchPassword){
         res.json({
@@ -86,8 +88,8 @@ app.post('/signin' , async (req, res) => {
         })
         return;
     }
-    const token = jwt.sign({userId : user.id} , JWT_SECRET)
 
+    const token = jwt.sign({userId : user.id} , process.env.JWT_SECRET! || "123123")
 
     res.json({
         token
@@ -95,15 +97,15 @@ app.post('/signin' , async (req, res) => {
 
 })
 
-app.post('/room' , middleware , async(req, res) => {
 
-    const validRoom  = CreateRoomSchema.safeParse(req.body)
+app.post("/room", middleware , async (req, res)=> {
+    const validRoom = CreateRoomSchema.safeParse(req.body)
 
     if(!validRoom.success){
         res.json({
-            error :"Invalid fields"
+            error: "Invalid Room Name"
         })
-        return
+        return;
     }
 
     const userId = req.userId
@@ -115,11 +117,12 @@ app.post('/room' , middleware , async(req, res) => {
         return;
     }
 
+
     const { roomName } = validRoom.data
 
     const existingRoom = await prismaClient.room.findFirst({
         where: {
-            slug :roomName
+            roomName
         }
     })
 
@@ -129,11 +132,13 @@ app.post('/room' , middleware , async(req, res) => {
         })
         return;
     }
-    
+
+
+
     const room = await prismaClient.room.create({
         data: {
-           slug: roomName,
-           adminId: userId
+            roomName,
+            userId
         }
     })
 
@@ -142,21 +147,48 @@ app.post('/room' , middleware , async(req, res) => {
     })
 })
 
-app.get("/room/:slug" , async (req, res) => {
-    const slug = req.params.slug
+app.get("/room/:roomName", async (req, res)=> {
+    const roomName = req.params.roomName
+
     const room = await prismaClient.room.findFirst({
         where:{
-            slug
+            roomName
+        },
+        include: {
+            shape: true
         }
-       
     })
 
     res.json({
         room
     })
+
+})
+
+app.get("/user", middleware , async (req, res)=>{
+    const userId = req.userId
+
+    const user = await prismaClient.user.findUnique({
+        where:{
+            id: userId
+        },
+        select:{
+            username: true,
+            id: true,
+            email: true,
+            room: true,
+            shapes: true
+        }
+    })
+
+    res.json({
+        user
+    })
 })
 
 
-app.listen(3000, ()=>{
+
+
+app.listen(3001, ()=>{
     console.log("Listening")
 })
