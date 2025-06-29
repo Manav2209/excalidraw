@@ -82,7 +82,7 @@ export class Game {
 
     }
 
-       async init()  {
+        async init()  {
         const room = await getRoom(this.room.roomName)
         room.shape.map((shape: any)=>{
             const shapes = JSON.parse(shape.data)
@@ -106,7 +106,7 @@ export class Game {
                 this.existingShape = this.existingShape.filter(
                     (shape) => JSON.stringify(shape) !== JSON.stringify(parsedShape.shape)
                 );
-              this.clearCanvas()
+                this.clearCanvas()
             }
 
         }
@@ -173,7 +173,7 @@ export class Game {
             }
         })
 
-       
+    
     
     }
 
@@ -250,7 +250,7 @@ export class Game {
             } else if (activeTool === "erase"){
                 this.erase(x, y)
             }   
-             else if (activeTool === "grab"){
+            else if (activeTool === "grab"){
                 const { x: transformedX, y: transformedY } = this.transformPanScale(e.clientX, e.clientY);
                 const { x: startTransformedX, y: startTransformedY } = this.transformPanScale(this.startX, this.startY);
             

@@ -1,6 +1,6 @@
 "use server"
 
-import { LoginSchema } from "@repo/common/types"
+import { LoginSchema } from "@/lib/schema"
 
 import { z } from "zod"
 

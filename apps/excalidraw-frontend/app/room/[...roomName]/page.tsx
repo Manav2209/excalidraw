@@ -1,7 +1,5 @@
 import { getRoom } from "@/actions/getRoom"
 import { RoomCanvas } from "@/canvas/RoomCanvas"
-import { Toolbar } from "@/components/Toolbar"
-
 
 const page = async ({params}: {
     params : {
@@ -17,11 +15,11 @@ const page = async ({params}: {
         return <p>The room Doesnt exist</p>
     }
 
-  return (
+    return (
 
         <RoomCanvas roomId={room.id} room={room} />
 
-  )
+    )
 }
 
 export default page

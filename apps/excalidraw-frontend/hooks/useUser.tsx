@@ -26,13 +26,13 @@ export const useUser = () : UseUserResponse => {
     useEffect(()=>{
         const fetchUser = async () =>{
             setIsLoading(true)
-           try{
-            const res = await fetch(`${process.env.NEXT_PUBLIC_HTTP_URL}/user`, {
-                method: "GET",
-                headers: {
-                    "authorization": `${localStorage.getItem("token")}`
-                }
-            })
+            try{
+              const res = await fetch(`${process.env.NEXT_PUBLIC_HTTP_URL}/user`, {
+                  method: "GET",
+                  headers: {
+                      "authorization": `${localStorage.getItem("token")}`
+                  }
+              })
 
             if(!res.ok){
                 throw new Error("Something Went Wrong")

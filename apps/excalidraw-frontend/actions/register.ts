@@ -1,4 +1,4 @@
-import { RegisterSchema }  from "../lib/schema"
+import { RegisterSchema }  from "@/lib/schema";
 import { z } from "zod"
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {

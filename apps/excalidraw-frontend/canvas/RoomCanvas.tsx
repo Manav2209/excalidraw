@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Canvas } from "./Canvas"
-import { Toolbar } from "@/components/Toolbar"
+
 
 export const RoomCanvas = ({roomId, room}: {roomId :string, room: any}) => {
     const [socket,  setSocket] = useState<WebSocket | null>(null)
